@@ -1,0 +1,1 @@
+Write a long, detailed technical essay about the history and likely future of computer hardware. Cover CPUs, GPUs, memory hierarchies, SSDs and storage, interconnects and networking, and how mixture-of-experts models change the memory requirements of inference. Be thorough and write many paragraphs.

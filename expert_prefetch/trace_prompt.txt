@@ -1,0 +1,15 @@
+You are a careful technical assistant. Answer the final question after reading the mixed material below.
+
+1) Systems programming. In C, mmap maps a file into the process address space so the OS pages data in on demand. A mixture-of-experts model can exploit this: only the routed experts selected for the current token need to be resident, while the rest stay on SSD. Explain the trade-off between page-cache thrashing and explicit streaming caches.
+
+2) Prosa in italiano. La nebbia, agli irti colli piovigginando sale, e sotto il maestrale urla e biancheggia il mar; ma per le vie del borgo dal ribollir de' tini va l'aspro odor dei vini l'anime a rallegrar.
+
+3) Mathematics. Let A be an n-by-n real matrix. Prove that if A is symmetric then all its eigenvalues are real, and sketch why the spectral theorem guarantees an orthonormal basis of eigenvectors.
+
+4) Code. Write a small function that, given the gate logits of a mixture-of-experts router, returns the indices of the top-k experts and their normalized weights using a softplus-then-normalize scheme rather than softmax.
+
+5) Multilingue. Traduisez la phrase suivante en anglais, puis en allemand: "Le renard brun rapide saute par-dessus le chien paresseux."
+
+6) Reasoning. A train leaves city A at 9:00 traveling at 80 km/h; another leaves city B, 300 km away, at 9:30 traveling at 100 km/h toward A. At what time do they meet?
+
+Final question: Summarize, in three sentences, why predicting which experts a model will need next can reduce the memory that must stay resident on a GPU, and name one concrete signal you could use to make that prediction.

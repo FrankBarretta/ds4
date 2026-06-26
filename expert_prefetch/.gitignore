@@ -1,0 +1,14 @@
+# Build artifacts
+*.exe
+*.o
+expert_prefetch_sim
+expert_trace_replay
+
+# Generated data (reproducible from the scripts)
+*.ds4geo
+real_trace.txt
+decode_trace.txt
+decode_only.txt
+decode_train.txt
+decode_test.txt
+*.log

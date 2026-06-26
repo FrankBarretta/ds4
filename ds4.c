@@ -41,6 +41,7 @@
 
 #ifndef DS4_NO_GPU
 #include "ds4_gpu.h"
+#include "ds4_expert_trace.h"
 #endif
 #if defined(__ARM_NEON)
 #include <arm_neon.h>
@@ -14104,6 +14105,7 @@ static bool metal_graph_decode_cpu_router(
     } else {
         layer_topk_selected_experts_from_probs(selected, weights, model, layer, probs);
     }
+    ds4_expert_trace_record(il, selected, DS4_N_EXPERT_USED);
     for (uint32_t i = 0; i < DS4_N_EXPERT_USED; i++) {
         selected_i32[i] = (int32_t)selected[i];
     }
@@ -14295,6 +14297,7 @@ static bool metal_graph_decode_cuda_selected_load(
     const double t_read = profile ? now_sec() : 0.0;
 
     if (ok) {
+        ds4_expert_trace_record(il, selected_ids, DS4_N_EXPERT_USED);
         const ds4_gpu_stream_expert_table table =
             graph_stream_expert_table_make(model,
                                            layer,
@@ -14376,6 +14379,10 @@ static bool metal_graph_cuda_stream_prefill_batch_selected_load(
                                   n_ids64 * sizeof(selected_ids[0])) != 0;
     const double t_read = profile ? now_sec() : 0.0;
     if (ok) {
+        for (uint32_t t = 0; t < n_tokens; t++)
+            ds4_expert_trace_record(il,
+                                    selected_ids + (size_t)t * DS4_N_EXPERT_USED,
+                                    DS4_N_EXPERT_USED);
         const ds4_gpu_stream_expert_table table =
             graph_stream_expert_table_make(model,
                                            layer,
