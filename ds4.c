@@ -14308,6 +14308,16 @@ static bool metal_graph_decode_cuda_selected_load(
                     &table,
                     selected_ids,
                     DS4_N_EXPERT_USED) != 0;
+        if (ok && ds4_expert_prefetch_enabled()) {
+            /* opt-in: warm the resident cache with geometric/co-activation
+             * neighbours so future tokens hit instead of streaming. */
+            int pf[64];
+            unsigned npf = ds4_expert_prefetch_collect(
+                    il, selected_ids, DS4_N_EXPERT_USED, pf, 64);
+            if (npf > 0)
+                (void)ds4_gpu_stream_expert_cache_seed_selected(
+                        &table, (const int32_t *)pf, npf);
+        }
     }
     const double t_load = profile ? now_sec() : 0.0;
 
@@ -14507,6 +14517,18 @@ static void metal_graph_selected_async_load_run(
                 job->selected_ids,
                 DS4_N_EXPERT_USED) == 0) {
         return;
+    }
+
+    /* opt-in: on the same worker thread that owns the resident expert cache,
+     * warm it with geometric/co-activation neighbours so future tokens hit
+     * (HBM->HBM copy) instead of streaming the expert from mmap. */
+    if (ds4_expert_prefetch_enabled()) {
+        int pf[64];
+        unsigned npf = ds4_expert_prefetch_collect(
+                job->il, (const int *)job->selected_ids, DS4_N_EXPERT_USED, pf, 64);
+        if (npf > 0)
+            (void)ds4_gpu_stream_expert_cache_seed_selected(
+                    &table, (const int32_t *)pf, npf);
     }
 
     job->ok = true;
@@ -15866,6 +15888,14 @@ static bool metal_graph_encode_decode_layer(
                             &table,
                             selected_ids,
                             DS4_N_EXPERT_USED) != 0;
+                if (ok && ds4_expert_prefetch_enabled()) {
+                    int pf[64];
+                    unsigned npf = ds4_expert_prefetch_collect(
+                            il, (const int *)selected_ids, DS4_N_EXPERT_USED, pf, 64);
+                    if (npf > 0)
+                        (void)ds4_gpu_stream_expert_cache_seed_selected(
+                                &table, (const int32_t *)pf, npf);
+                }
             }
         }
         if (ok) ok = ds4_gpu_routed_moe_one_tensor(g->routed_out,
